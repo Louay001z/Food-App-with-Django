@@ -1,0 +1,2458 @@
+{% block content %}
+  <div class="container-menu">
+    <!-- Left Sidebar -->
+    <div class="left-sidebar">
+      <a href="{% url 'home' %}"><h2>B'aamira.</h2></a>
+      <ul>
+        <li onclick="showPage('food-order')">
+          <a href="#" onclick="event.preventDefault();">🍽️ Food Order</a>
+        </li>
+        <li onclick="showPage('reservations')">
+          <a href="#" onclick="event.preventDefault();">📅 Reservations</a>
+        </li>
+        <li onclick="showPage('favorite')">
+          <a href="#" onclick="event.preventDefault();">❤️ Favorite</a>
+        </li>
+        <li onclick="showPage('message')">
+          <a href="#" onclick="event.preventDefault();">💬 Message (Coming Soon)</a>
+        </li>
+        <li onclick="showPage('order-history')">
+          <a href="#" onclick="event.preventDefault();">📜 Order History</a>
+        </li>
+        <li onclick="showPage('order-tracking')">
+          <a href="#" onclick="event.preventDefault();">🚚 Order Tracking</a>
+        </li>
+        <li onclick="showPage('bills')">
+          <a href="#" onclick="event.preventDefault();">💳 Bills (Coming Soon)</a>
+        </li>
+        <li onclick="showPage('notifications')">
+          <a href="#" onclick="event.preventDefault();">🔔 Notifications</a>
+        </li>
+        <li onclick="showPage('profile')">
+          <a href="#" onclick="event.preventDefault();">👤 Profile</a>
+        </li>
+        <li onclick="showPage('cart')">
+          <a href="#" onclick="event.preventDefault();">🛒 Cart</a>
+        </li>
+        <li onclick="showPage('rewards')">
+          <a href="#" onclick="event.preventDefault();">🎁 Rewards</a>
+        </li>
+        <li onclick="showPage('help')">
+          <a href="#" onclick="event.preventDefault();">ℹ️ Help/Support</a>
+        </li>
+        <li data-page="analytics">
+          <a href="#" onclick="event.preventDefault();">📊 Analytics</a>
+        </li>
+      </ul>
+      {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}</p>
+        <button onclick="logout()">Logout</button>
+      {% else %}
+        <a href="{% url 'login' %}"><button>Login</button></a>
+      {% endif %}
+      <button class="upgrade">Upgrade</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header>
+        <input type="text" id="search" placeholder="What do you want to eat today?" onkeyup="searchMenu()" />
+      </header>
+
+      <!-- Pages -->
+
+      <!-- Food Order -->
+      <div id="food-order" class="page">
+        <section class="banner">
+          <h2>Get Discount Voucher<br />Up to 15%</h2>
+        </section>
+        <section class="categories">
+          <div data-category="Bakery">🍞 Bakery</div>
+          <div data-category="Burger">🍔 Burger</div>
+          <div data-category="Beverage">🥤 Beverage</div>
+          <div data-category="Chicken">🍗 Chicken</div>
+          <div data-category="Pizza">🍕 Pizza</div>
+          <div data-category="Seafood">🐟 Seafood</div>
+        </section>
+        <section class="menu-dishes">
+          <h2 class="section-title">Menu</h2>
+          <div class="dishes-container" id="dishes-container-food-order">
+            {% for dish in dishes %}
+              <div class="dish-card" data-category="{{ dish.category.name|default:'Uncategorized' }}">
+                <div class="dish-image">
+                  {% if dish.image and dish.image.url %}
+                    <img src="{{ dish.image.url }}" alt="{{ dish.name }}" />
+                  {% endif %}
+                  <span class="discount-badge">15% Off</span>
+                </div>
+                <div class="dish-details">
+                  <div class="rating">★★★★☆</div>
+                  <h3 class="dish-name">{{ dish.name|truncatechars:20 }}</h3>
+                  <div class="price">${{ dish.price }}</div>
+                  <button class="add-to-cart" data-dish-id="{{ dish.id }}" data-name="{{ dish.name }}" data-price="{{ dish.price }}">Add to Cart</button>
+                  <button class="favorite-btn" data-dish-id="{{ dish.id }}" data-is-favorited="false">❤️</button>
+                </div>
+              </div>
+            {% empty %}
+              <p>No dishes available.</p>
+            {% endfor %}
+          </div>
+          <div class="view-all">
+            <a href="#">View all</a>
+          </div>
+        </section>
+      </div>
+
+      <!-- Reservations -->
+      <div id="reservations" class="page">
+        <h2>Reservations</h2>
+        <div class="reservation-form">
+          <h3>Make a Reservation</h3>
+          <form id="reservation-form" onsubmit="submitReservation(event)">
+            <label for="first-name">First Name:</label>
+            <input type="text" id="first-name" name="first_name" required>
+            
+            <label for="last-name">Last Name:</label>
+            <input type="text" id="last-name" name="last_name" required>
+            
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="reservation-date">Date:</label>
+            <input type="date" id="reservation-date" name="date" required>
+            
+            <label for="reservation-time">Time:</label>
+            <input type="time" id="reservation-time" name="time" required>
+            
+            <label for="reservation-people">Number of People:</label>
+            <input type="number" id="reservation-people" name="people" min="1" required>
+            
+            <button type="submit">Book Now</button>
+          </form>
+        </div>
+        <div id="reservations-list">
+          <h3>Your Reservations</h3>
+          <table class="reservation-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>People</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="reservations-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Favorite -->
+      <div id="favorite" class="page">
+        <h2>Favorite Dishes</h2>
+        <div id="favorite-list">
+          <div class="dishes-container" id="favorite-dishes-container">
+            <!-- Populated dynamically -->
+          </div>
+          <p id="no-favorites" style="display: none;">No favorite dishes added yet.</p>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div id="message" class="page">
+        <h2>Message</h2>
+        <p>Coming Soon!</p>
+      </div>
+
+      <!-- Order Tracking -->
+      <div id="order-tracking" class="page">
+        <h2>Order Tracking</h2>
+        <div id="order-tracking-list">
+          <h3>Your Active Orders</h3>
+          <table class="order-tracking-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="order-tracking-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Order History -->
+      <div id="order-history" class="page">
+        <h2>Order History</h2>
+        <div id="order-history-list">
+          {% if orders %}
+            <table class="order-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="order-history-tbody">
+                {% for order in orders %}
+                  <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>
+                      {% for item in order.items %}
+                        {{ item.dish_name }} (x{{ item.quantity }})<br>
+                      {% endfor %}
+                    </td>
+                    <td>${{ order.total }}</td>
+                    <td>{{ order.status }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5">No orders found.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p>No orders found.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Bills -->
+      <div id="bills" class="page">
+        <h2>Bills</h2>
+        <p>Coming Soon!</p>
+      </div>
+
+      <!-- Notifications -->
+      <div id="notifications" class="page">
+        <h2>Notifications</h2>
+        <div id="notifications-list">
+          <table class="notification-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="notifications-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div id="profile" class="page">
+        <h2>Profile</h2>
+        {% if user.is_authenticated %}
+          <div class="profile-container">
+            <div class="profile-header">
+              <div class="profile-photo">
+                {% if user.profile.photo %}
+                  <img src="{{ user.profile.photo.url }}" alt="Profile Photo" id="profilePhoto">
+                {% else %}
+                  <img src="/static/images/default-profile.png" alt="Default Profile Photo" id="profilePhoto">
+                {% endif %}
+                <input type="file" id="photoUpload" name="photo" accept="image/*" style="display: none;">
+                <br><br>
+                <button onclick="document.getElementById('photoUpload').click()" class="upload-btn">Change Photo</button>
+              </div>
+              <h3>{{ user.username }}</h3>
+            </div>
+            <div class="profile-details">
+              <p><strong>Email:</strong> {{ user.email|default:"Not provided" }}</p>
+              <p><strong>Phone Number:</strong> {{ user.profile.phone|default:"Not provided" }}</p>
+              <p><strong>Location:</strong> {{ user.profile.location|default:"Not provided" }}</p>
+            </div>
+            <button onclick="showEditProfileForm()" class="edit-btn">Edit Profile</button>
+
+            <!-- Edit Profile Form (Hidden by Default) -->
+            <form id="editProfileForm" class="edit-profile-form" style="display: none;" onsubmit="submitProfileEdit(event)">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ user.email|default_if_none:'' }}" required>
+                <div class="error" id="emailError"></div>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" value="{{ user.profile.phone|default_if_none:'' }}">
+                <div class="error" id="phoneError"></div>
+              </div>
+              <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="{{ user.profile.location|default_if_none:'' }}">
+                <div class="error" id="locationError"></div>
+              </div>
+              <button type="submit" class="save-btn">Save Changes</button>
+              <button type="button" onclick="hideEditProfileForm()" class="cancel-btn">Cancel</button>
+            </form>
+          </div>
+        {% else %}
+          <p>Please <a href="{% url 'login' %}">login</a> to view your profile.</p>
+        {% endif %}
+      </div>
+
+      <!-- Cart -->
+      <div id="cart" class="page">
+        <h2>Cart</h2>
+        <div class="cart-container">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Dish</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cart-items">
+              {% for item in cart_items %}
+                <tr data-item-id="{{ item.id }}">
+                  <td>{{ item.dish.name }}</td>
+                  <td>${{ item.dish.price }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>${{ item.total_price }}</td>
+                  <td>
+                    <button onclick="deleteCartItem({{ item.id }})" class="delete-btn">Delete</button>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">No items in cart.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="cart-footer">
+            <p id="cart-total">Total: $0.00</p>
+            <button onclick="submitOrder()" class="checkout-btn">Checkout</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rewards -->
+      <div id="rewards" class="page">
+        <h2>Rewards</h2>
+        <div id="message-container"></div> <!-- For success/error messages -->
+        <div id="rewards-info">
+          <p><strong>Points:</strong> <span id="reward-points">0</span></p>
+          <p><strong>Available Rewards:</strong></p>
+          <ul id="rewards-list"></ul>
+          <div class="redeem-section">
+            <label for="reward-select">Select a Reward:</label>
+            <select id="reward-select">
+              <option value="">-- Select a Reward --</option>
+            </select>
+            <button class="rewardbttn" onclick="redeemReward()">Redeem Points</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Help/Support -->
+      <div id="help" class="page">
+        <h2>Help/Support</h2>
+        <div class="help-container">
+          <!-- Contact Us Section -->
+          <div class="help-card">
+            <h3>Contact Us</h3>
+            <div class="contact-info">
+              <p><strong>Email:</strong> <a href="mailto:louaybenamira@baamira.com">louaybenamira@baamira.com</a></p>
+              <p><strong>Phone:</strong> <a href="tel:+1-800-555-1234">+1-800-555-1234</a></p>
+            </div>
+          </div>
+
+          <!-- FAQs Section -->
+          <div class="help-card">
+            <h3>FAQs</h3>
+            <div class="faq-list">
+              <div class="faq-item">
+                <h4>How do I place an order?</h4>
+                <p>Go to the Food Order page, select your dishes, add them to your cart, and click Checkout.</p>
+              </div>
+              <div class="faq-item">
+                <h4>Can I cancel a reservation?</h4>
+                <p>Yes, you can cancel a reservation from the Reservations page by clicking the Cancel button next to your reservation.</p>
+              </div>
+              <div class="faq-item">
+                <h4>How do I earn rewards?</h4>
+                <p>You earn points for every order you place. Check the Rewards page for more details.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Support Form -->
+          <div class="help-card">
+            <h3>Contact Support</h3>
+            <form id="support-form" onsubmit="submitSupportRequest(event)">
+              <div class="form-group">
+                <label for="support-subject">Subject</label>
+                <input type="text" id="support-subject" name="subject" required>
+              </div>
+              <div class="form-group">
+                <label for="support-message">Message</label>
+                <textarea id="support-message" name="message" rows="5" required></textarea>
+              </div>
+              <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Dashboard -->
+      <div id="analytics" class="page">
+        <h2>Analytics Dashboard</h2>
+        <div class="analytics-container">
+          <!-- Total Sales -->
+          <div class="analytics-card">
+            <h3>Total Sales</h3>
+            <p id="total-sales">$0.00</p>
+          </div>
+
+          <!-- Daily Sales Chart -->
+          <div class="analytics-card">
+            <h3>Daily Sales (Last 7 Days)</h3>
+            <canvas id="dailySalesChart" width="400" height="200"></canvas>
+          </div>
+
+          <!-- Popular Items Chart -->
+          <div class="analytics-card">
+            <h3>Popular Items</h3>
+            <canvas id="popularItemsChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+      <div class="cart-summary">
+        <h3>Cart Summary</h3>
+        <p><strong><span id="cart-item-count">0</span> Items in Cart</strong></p>
+        <div id="cart-summary-preview"></div>
+      </div>
+      <h3 class="order-menu">Order Menu</h3>
+      <div id="order-menu"></div>
+      <h3 class="total">Total: $<span id="total">0.00</span></h3>
+      <button class="checkout" onclick="submitOrder()">Checkout</button>
+      <div id="sidebar-messages" class="sidebar-messages">
+        <button onclick="clearMessages()" class="clear-messages-btn">Clear Messages</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM fully loaded');
+
+      // Attach event listeners to sidebar menu items
+      document.querySelectorAll('.left-sidebar ul li').forEach(item => {
+        item.addEventListener('click', () => {
+          const pageId = item.getAttribute('data-page') || item.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+          if (pageId) {
+            showPage(pageId);
+          }
+        });
+      });
+
+      // Attach event listeners to "Add to Cart" buttons
+      document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', () => {
+          const dishId = button.getAttribute('data-dish-id');
+          const dishName = button.getAttribute('data-name');
+          const dishPrice = parseFloat(button.getAttribute('data-price'));
+          addToCart(dishId, dishName, dishPrice);
+        });
+      });
+
+      // Attach event listeners to "Add to Favorites" buttons
+      document.querySelectorAll('.favorite-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const dishId = button.getAttribute('data-dish-id');
+          const isFavorited = button.getAttribute('data-is-favorited') === 'true';
+          toggleFavorite(dishId, isFavorited, button);
+        });
+      });
+
+      // Initial fetches
+      showPage('food-order');
+      fetchCartItems();
+      fetchFavorites();
+      fetchRewards();
+    });
+
+    // Function to show the selected page and hide others
+    function showPage(pageId) {
+      console.log('Showing page:', pageId);
+      document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+      });
+
+      const pageElement = document.getElementById(pageId);
+      if (pageElement) {
+        pageElement.style.display = 'block';
+      } else {
+        console.error('Page element not found:', pageId);
+      }
+
+      document.querySelectorAll('.left-sidebar ul li').forEach(li => {
+        li.classList.remove('active');
+      });
+      const activeLi = document.querySelector(`.left-sidebar ul li[data-page="${pageId}"]`) || 
+                      document.querySelector(`.left-sidebar ul li[onclick*="('${pageId}')"]`);
+      if (activeLi) {
+        activeLi.classList.add('active');
+      }
+
+      if (pageId === 'cart' || pageId === 'food-order') {
+        fetchCartItems();
+      } else if (pageId === 'order-history') {
+        fetchOrderHistory();
+      } else if (pageId === 'order-tracking') {
+        fetchOrderTracking();
+      } else if (pageId === 'reservations') {
+        fetchReservations();
+      } else if (pageId === 'notifications') {
+        fetchNotifications();
+      } else if (pageId === 'rewards') {
+        fetchRewards();
+      } else if (pageId === 'favorite') {
+        fetchFavorites();
+      } else if (pageId === 'analytics') {
+        fetchAnalyticsData();
+      }
+    }
+
+    // CSRF Token Helper
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === name + '=') {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // Display Message in Sidebar
+    function displayMessage(message, type = 'success') {
+      const messagesContainer = document.getElementById('sidebar-messages');
+      if (!messagesContainer) {
+        console.error('Sidebar messages container not found');
+        return;
+      }
+
+      const messageElement = document.createElement('p');
+      messageElement.textContent = message;
+      messageElement.className = type;
+      
+      while (messagesContainer.children.length > 5) {
+        messagesContainer.removeChild(messagesContainer.firstChild);
+      }
+
+      messagesContainer.appendChild(messageElement);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      setTimeout(() => {
+        if (messageElement.parentNode) {
+          messageElement.parentNode.removeChild(messageElement);
+        }
+      }, 5000);
+    }
+
+    // Clear Messages
+    function clearMessages() {
+      const messagesContainer = document.getElementById('sidebar-messages');
+      if (messagesContainer) {
+        const clearButton = messagesContainer.querySelector('.clear-messages-btn');
+        messagesContainer.innerHTML = '';
+        if (clearButton) {
+          messagesContainer.appendChild(clearButton);
+        } else {
+          messagesContainer.innerHTML = '<button onclick="clearMessages()" class="clear-messages-btn">Clear Messages</button>';
+        }
+      }
+    }
+
+    // Fetch Analytics Data and Render Charts
+    async function fetchAnalyticsData() {
+      try {
+        const response = await fetch('{% url "analytics_dashboard" %}');
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          document.getElementById('total-sales').textContent = `$${data.total_sales.toFixed(2)}`;
+
+          const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+          new Chart(dailySalesCtx, {
+            type: 'line',
+            data: {
+              labels: data.daily_sales_data.labels,
+              datasets: [{
+                label: 'Sales ($)',
+                data: data.daily_sales_data.data,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.1
+              }]
+            },
+            options: {
+              scales: {
+                y: { beginAtZero: true }
+              }
+            }
+          });
+
+          const popularItemsCtx = document.getElementById('popularItemsChart').getContext('2d');
+          new Chart(popularItemsCtx, {
+            type: 'bar',
+            data: {
+              labels: data.popular_items_data.labels,
+              datasets: [{
+                label: 'Quantity Sold',
+                data: data.popular_items_data.data,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: { beginAtZero: true }
+              }
+            }
+          });
+        } else {
+          displayMessage('Failed to load analytics data.', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching analytics data:', error);
+        displayMessage('Error loading analytics data.', 'error');
+      }
+    }
+
+    // Add to Cart with Event Delegation
+    document.addEventListener('click', async function(event) {
+      if (event.target.classList.contains('add-to-cart')) {
+        event.preventDefault();
+        const button = event.target;
+        const dishId = button.getAttribute('data-dish-id');
+        const price = parseFloat(button.getAttribute('data-price'));
+
+        try {
+          const response = await fetch('{% url "add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ dish_id: dishId, price: price, quantity: 1 })
+          });
+          const data = await response.json();
+
+          if (data.status === 'success') {
+            await fetchCartItems();
+            addRewardPoints(price);
+            displayMessage('Item added to cart!', 'success');
+          } else {
+            displayMessage(data.message, 'error');
+            if (data.message === 'Login required') {
+              window.location.href = '{% url "login" %}';
+            }
+          }
+        } catch (error) {
+          console.error('Error adding to cart:', error);
+          displayMessage('An error occurred while adding the item to the cart.', 'error');
+        }
+      }
+
+      if (event.target.classList.contains('favorite-btn')) {
+        event.preventDefault();
+        const button = event.target;
+        const dishId = button.getAttribute('data-dish-id');
+        const isFavorited = button.getAttribute('data-is-favorited') === 'true';
+
+        if (isFavorited) {
+          removeFromFavorites(dishId);
+        } else {
+          addToFavorites(dishId);
+        }
+      }
+    });
+
+    // Fetch and display cart items
+    async function fetchCartItems() {
+      console.log('Fetching cart items...');
+      try {
+        const response = await fetch('{% url "get_cart_items" %}');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        console.log('Cart data:', data);
+
+        const cartList = document.getElementById('cart-items');
+        const orderMenu = document.getElementById('order-menu');
+        const totalDisplay = document.getElementById('total');
+        const cartItemCount = document.getElementById('cart-item-count');
+        const cartSummaryPreview = document.getElementById('cart-summary-preview');
+        let total = 0;
+
+        if (cartList) cartList.innerHTML = '';
+        if (orderMenu) orderMenu.innerHTML = '';
+        if (totalDisplay) totalDisplay.textContent = '0.00';
+        if (cartItemCount) cartItemCount.textContent = '0';
+        if (cartSummaryPreview) cartSummaryPreview.innerHTML = '';
+
+        if (data.status === 'success' && data.cart_items.length > 0) {
+          console.log('Rendering cart items:', data.cart_items);
+          data.cart_items.forEach(item => {
+            if (cartList) {
+              const row = document.createElement('tr');
+              row.setAttribute('data-item-id', item.id);
+              row.innerHTML = `
+                <td>${item.dish_name}</td>
+                <td>$${item.price}</td>
+                <td>${item.quantity}</td>
+                <td>$${(item.price * item.quantity).toFixed(2)}</td>
+                <td><button onclick="deleteCartItem(${item.id})" class="delete-btn">Delete</button></td>
+              `;
+              cartList.appendChild(row);
+            }
+
+            if (orderMenu) {
+              const orderItem = document.createElement('p');
+              orderItem.setAttribute('data-item-id', item.id);
+              orderItem.textContent = `${item.dish_name} - $${item.price} (x${item.quantity})`;
+              orderMenu.appendChild(orderItem);
+            }
+
+            if (cartSummaryPreview) {
+              const previewItem = document.createElement('p');
+              previewItem.textContent = `${item.dish_name} (x${item.quantity})`;
+              cartSummaryPreview.appendChild(previewItem);
+            }
+
+            total += item.price * item.quantity;
+          });
+
+          if (cartItemCount) cartItemCount.textContent = data.cart_items.length;
+          if (cartList && document.getElementById('cart-total')) {
+            document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+          }
+          if (totalDisplay) totalDisplay.textContent = total.toFixed(2);
+        } else {
+          console.log('No cart items to render');
+          if (cartList) cartList.innerHTML = '<tr><td colspan="5">No items in cart.</td></tr>';
+          if (orderMenu) orderMenu.innerHTML = '<p>No items in cart.</p>';
+          if (cartList && document.getElementById('cart-total')) {
+            document.getElementById('cart-total').textContent = 'Total: $0.00';
+          }
+          if (totalDisplay) totalDisplay.textContent = '0.00';
+          if (cartItemCount) cartItemCount.textContent = '0';
+          if (cartSummaryPreview) cartSummaryPreview.innerHTML = '<p>No items in cart.</p>';
+        }
+      } catch (error) {
+        console.error('Error fetching cart items:', error);
+        if (cartList) cartList.innerHTML = '<tr><td colspan="5">Error loading cart items.</td></tr>';
+        if (orderMenu) orderMenu.innerHTML = '<p>Error loading cart items.</p>';
+      }
+    }
+
+    // Delete a cart item
+    async function deleteCartItem(itemId) {
+      const response = await fetch('{% url "delete_cart_item" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ item_id: itemId })
+      });
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        displayMessage('Item removed from cart!', 'success');
+        fetchCartItems();
+        addNotification(`Item #${itemId} removed from cart.`);
+      } else {
+        displayMessage(data.message || 'Failed to remove item from cart.', 'error');
+      }
+    }
+
+    // Submit Order
+    async function submitOrder() {
+      try {
+        const response = await fetch('{% url "submit_order" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({})
+        });
+        
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          displayMessage(`Order #${data.order_id} placed successfully!`, 'success');
+          await Promise.all([
+            fetchCartItems(),
+            fetchOrderHistory(),
+            fetchOrderTracking()
+          ]);
+          addNotification(`Order #${data.order_id} placed successfully!`);
+        } else {
+          displayMessage(data.message || 'Failed to place order. Please try again.', 'error');
+          if (data.message === 'Login required') {
+            window.location.href = '{% url "login" %}';
+          }
+        }
+      } catch (error) {
+        console.error('Error submitting order:', error);
+        displayMessage('An error occurred while placing your order. Please try again.', 'error');
+      }
+    }
+
+    // Fetch Order History
+    async function fetchOrderHistory() {
+      const response = await fetch('{% url "get_order_history" %}');
+      const data = await response.json();
+      const orderHistoryList = document.getElementById('order-history-tbody');
+      orderHistoryList.innerHTML = '';
+
+      if (data.status === 'success' && data.orders.length > 0) {
+        data.orders.forEach(order => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${order.id}</td>
+            <td>${new Date(order.created_at).toLocaleString()}</td>
+            <td>${order.items.map(item => `${item.dish_name} (x${item.quantity})`).join('<br>')}</td>
+            <td>$${order.total}</td>
+            <td>${order.status}</td>
+          `;
+          orderHistoryList.appendChild(row);
+        });
+      } else {
+        orderHistoryList.innerHTML = '<tr><td colspan="5">No orders found.</td></tr>';
+      }
+    }
+
+    // Submit Reservation
+    async function submitReservation(event) {
+      event.preventDefault();
+
+      const firstName = document.getElementById('first-name').value;
+      const lastName = document.getElementById('last-name').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const date = document.getElementById('reservation-date').value;
+      const time = document.getElementById('reservation-time').value;
+      const people = document.getElementById('reservation-people').value;
+
+      if (!firstName || !lastName || !phone || !email || !date || !time || !people) {
+        displayMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('{% url "submit_reservation" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone,
+            email: email,
+            date: date,
+            time: time,
+            people: people
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          displayMessage('Reservation booked successfully!', 'success');
+          document.getElementById('reservation-form').reset();
+          fetchReservations();
+          addNotification(`Reservation #${data.reservation_id} booked for ${date} at ${time}`);
+        } else {
+          displayMessage(data.message || 'Failed to book reservation.', 'error');
+          if (data.message === 'Login required') {
+            window.location.href = '{% url "login" %}';
+          }
+        }
+      } catch (error) {
+        console.error('Error submitting reservation:', error);
+        displayMessage('An error occurred while booking the reservation. Please try again.', 'error');
+      }
+    }
+
+    // Fetch Reservations
+    async function fetchReservations() {
+      const response = await fetch('{% url "get_reservations" %}');
+      const data = await response.json();
+      const reservationsList = document.getElementById('reservations-tbody');
+      reservationsList.innerHTML = '';
+
+      if (data.status === 'success' && data.reservations.length > 0) {
+        data.reservations.forEach(reservation => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${reservation.id}</td>
+            <td>${reservation.date}</td>
+            <td>${reservation.time}</td>
+            <td>${reservation.people}</td>
+            <td>${reservation.first_name} ${reservation.last_name}</td>
+            <td>${reservation.status}</td>
+            <td>
+              <button onclick="cancelReservation(${reservation.id})" 
+                      ${reservation.status !== 'Pending' ? 'disabled' : ''}>
+                Cancel
+              </button>
+            </td>
+          `;
+          reservationsList.appendChild(row);
+        });
+      } else {
+        reservationsList.innerHTML = '<tr><td colspan="7">No reservations found.</td></tr>';
+      }
+    }
+
+    // Cancel Reservation
+    async function cancelReservation(reservationId) {
+      if (!confirm('Are you sure you want to cancel this reservation?')) return;
+
+      try {
+        const response = await fetch('{% url "cancel_reservation" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ reservation_id: reservationId })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          displayMessage('Reservation cancelled successfully!', 'success');
+          fetchReservations();
+          addNotification(`Reservation #${reservationId} has been cancelled.`);
+        } else {
+          displayMessage(data.message || 'Failed to cancel reservation.', 'error');
+        }
+      } catch (error) {
+        console.error('Error cancelling reservation:', error);
+        displayMessage('An error occurred while cancelling the reservation. Please try again.', 'error');
+      }
+    }
+
+    // Add Notification
+    async function addNotification(message) {
+      const response = await fetch('{% url "add_notification" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        fetchNotifications();
+      }
+    }
+
+    // Mark Notification as Read
+    async function markNotificationAsRead(notificationId) {
+      const response = await fetch('{% url "mark_notification_read" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ notification_id: notificationId })
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        fetchNotifications();
+      } else {
+        displayMessage(data.message, 'error');
+      }
+    }
+
+    // Fetch Notifications
+    async function fetchNotifications() {
+      const response = await fetch('{% url "get_notifications" %}');
+      const data = await response.json();
+      const notificationsList = document.getElementById('notifications-tbody');
+      notificationsList.innerHTML = '';
+
+      if (data.status === 'success' && data.notifications.length > 0) {
+        data.notifications.forEach(notification => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${new Date(notification.created_at).toLocaleString()}</td>
+            <td>${notification.message}</td>
+            <td>${notification.is_read ? 'Read' : 'Unread'}</td>
+            <td><button onclick="markNotificationAsRead(${notification.id})" ${notification.is_read ? 'disabled' : ''}>Mark as Read</button></td>
+          `;
+          notificationsList.appendChild(row);
+        });
+      } else {
+        notificationsList.innerHTML = '<tr><td colspan="4">No notifications found.</td></tr>';
+      }
+    }
+
+    let serverRewards = [];
+
+    // Fetch Rewards
+    async function fetchRewards() {
+      try {
+        const response = await fetch('{% url "get_rewards" %}');
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            displayMessage('Please log in to view rewards.', 'error');
+            window.location.href = '{% url "login" %}';
+            return;
+          }
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Fetched data:', data);
+        const pointsDisplay = document.getElementById('reward-points');
+        const rewardsList = document.getElementById('rewards-list');
+        const rewardSelect = document.getElementById('reward-select');
+        rewardsList.innerHTML = '';
+
+        if (data.status === 'success') {
+          pointsDisplay.textContent = data.points;
+          serverRewards = data.rewards || [];
+
+          if (serverRewards.length > 0) {
+            serverRewards.forEach(reward => {
+              const li = document.createElement('li');
+              li.textContent = `${reward.name} - ${reward.points_required} points`;
+              rewardsList.appendChild(li);
+            });
+
+            rewardSelect.innerHTML = '<option value="">-- Select a Reward --</option>';
+            serverRewards.forEach(reward => {
+              const option = document.createElement('option');
+              option.value = reward.id;
+              option.textContent = `${reward.name} (${reward.points_required} points)`;
+              rewardSelect.appendChild(option);
+            });
+          } else {
+            rewardsList.innerHTML = '<li>No rewards available.</li>';
+            rewardSelect.innerHTML = '<option value="">-- Select a Reward --</option>';
+          }
+        } else {
+          displayMessage('Failed to fetch rewards: ' + (data.message || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching rewards:', error);
+        displayMessage('An error occurred while fetching rewards.', 'error');
+      }
+    }
+
+    // Add Reward Points
+    async function addRewardPoints(points) {
+      try {
+        const response = await fetch('{% url "add_reward_points" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ points })
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          fetchRewards();
+          displayMessage(`Added ${points} points successfully!`, 'success');
+        } else {
+          displayMessage(data.message || 'Failed to add points.', 'error');
+        }
+      } catch (error) {
+        console.error('Error adding points:', error);
+        displayMessage('An error occurred while adding points.', 'error');
+      }
+    }
+
+    // Redeem Reward
+    async function redeemReward() {
+      const rewardSelect = document.getElementById('reward-select');
+      const selectedRewardId = rewardSelect.value;
+
+      if (!selectedRewardId) {
+        displayMessage('Please select a reward to redeem!', 'error');
+        return;
+      }
+
+      const selectedReward = serverRewards.find(reward => reward.id == selectedRewardId);
+      if (!selectedReward) {
+        displayMessage('Selected reward not found.', 'error');
+        return;
+      }
+
+      const currentPoints = parseInt(document.getElementById('reward-points').textContent);
+
+      if (currentPoints < selectedReward.points_required) {
+        displayMessage(`You need ${selectedReward.points_required - currentPoints} more points to redeem this reward!`, 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('{% url "redeem_reward" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ reward_id: selectedRewardId })
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          displayMessage(`Successfully redeemed ${selectedReward.name}!`, 'success');
+          fetchRewards();
+        } else {
+          displayMessage(data.message || 'Failed to redeem reward.', 'error');
+        }
+      } catch (error) {
+        console.error('Error redeeming reward:', error);
+        displayMessage('An error occurred while redeeming the reward.', 'error');
+      }
+    }
+
+    // Submit Support Request
+    async function submitSupportRequest(event) {
+      event.preventDefault();
+      const subject = document.getElementById('support-subject').value;
+      const message = document.getElementById('support-message').value;
+
+      const response = await fetch('{% url "submit_support_request" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ subject, message })
+      });
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        displayMessage('Support request submitted successfully!', 'success');
+        document.getElementById('support-form').reset();
+        addNotification('Support request submitted: ' + subject);
+      } else {
+        displayMessage(data.message, 'error');
+        if (data.message === 'Login required') {
+          window.location.href = '{% url "login" %}';
+        }
+      }
+    }
+
+    // Logout
+    async function logout() {
+      const response = await fetch('{% url "logout" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
+      const data = await response.json();
+      if (data.message) {
+        window.location.reload();
+      }
+    }
+
+    // Category Filter
+    document.querySelectorAll('.categories div').forEach((category) => {
+      category.addEventListener('click', function () {
+        const selectedCategory = this.getAttribute('data-category');
+        document.querySelectorAll('.categories div').forEach((div) => div.classList.remove('active'));
+        this.classList.add('active');
+        filterDishes(selectedCategory);
+      });
+    });
+
+    function filterDishes(category) {
+      document.querySelectorAll('.dish-card').forEach((card) => {
+        const dishCategory = card.getAttribute('data-category');
+        card.classList.toggle('hidden', category !== 'All' && dishCategory !== category);
+      });
+    }
+
+    // Search Menu
+    function searchMenu() {
+      const query = document.getElementById('search').value.toLowerCase();
+      document.querySelectorAll('.dish-card').forEach((card) => {
+        const name = card.querySelector('.dish-name').textContent.toLowerCase();
+        card.classList.toggle('hidden', !name.includes(query));
+      });
+    }
+
+    // Profile Photo Upload Preview
+    document.getElementById('photoUpload').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('profilePhoto').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Show/Hide Edit Profile Form
+    function showEditProfileForm() {
+      document.getElementById('editProfileForm').style.display = 'block';
+      document.querySelector('.edit-btn').style.display = 'none';
+    }
+
+    function hideEditProfileForm() {
+      document.getElementById('editProfileForm').style.display = 'none';
+      document.querySelector('.edit-btn').style.display = 'block';
+      document.querySelectorAll('.error').forEach(error => error.classList.remove('active'));
+    }
+
+    // Submit Profile Edit Form
+    async function submitProfileEdit(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const location = document.getElementById('location').value;
+      const photo = document.getElementById('photoUpload').files[0];
+
+      document.querySelectorAll('.error').forEach(error => error.classList.remove('active'));
+
+      if (!isEmailValid(email)) {
+        showError(document.getElementById('emailError'), 'Valid email is required');
+        return;
+      }
+
+      if (phone && !isPhoneValid(phone)) {
+        showError(document.getElementById('phoneError'), 'Valid phone number is required (at least 10 digits)');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('location', location);
+      if (photo) {
+        formData.append('photo', photo);
+      }
+
+      const response = await fetch('{% url "edit_profile" %}', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        displayMessage('Profile updated successfully!', 'success');
+        window.location.reload();
+      } else {
+        if (data.errors) {
+          const fieldToErrorIdMap = {
+            'email': 'emailError',
+            'phone': 'phoneError',
+            'location': 'locationError'
+          };
+
+          for (const [field, message] of Object.entries(data.errors)) {
+            const errorElementId = fieldToErrorIdMap[field];
+            const errorElement = document.getElementById(errorElementId);
+            if (errorElement) {
+              showError(errorElement, message);
+            }
+          }
+        } else {
+          displayMessage('An error occurred: ' + (data.message || 'Please try again.'), 'error');
+        }
+      }
+    }
+
+    // Validation Functions
+    function showError(element, message) {
+      element.textContent = message;
+      element.classList.add('active');
+    }
+
+    function isEmailValid(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function isPhoneValid(phone) {
+      return /^\d{10,}$/.test(phone);
+    }
+
+    // Favorite Functions
+    async function fetchFavorites() {
+      try {
+        const response = await fetch('{% url "get_favorites" %}');
+        const data = await response.json();
+        const favoriteContainer = document.getElementById('favorite-dishes-container');
+        const noFavoritesMessage = document.getElementById('no-favorites');
+        if (favoriteContainer) favoriteContainer.innerHTML = '';
+
+        if (data.status === 'success') {
+          if (favoriteContainer) {
+            if (data.favorites.length > 0) {
+              noFavoritesMessage.style.display = 'none';
+              data.favorites.forEach(dish => {
+                const dishCard = document.createElement('div');
+                dishCard.classList.add('dish-card');
+                dishCard.innerHTML = `
+                  <div class="dish-image">
+                    ${dish.image ? `<img src="${dish.image}" alt="${dish.name}" />` : ''}
+                    <span class="discount-badge">15% Off</span>
+                  </div>
+                  <div class="dish-details">
+                    <div class="rating">★★★★☆</div>
+                    <h3 class="dish-name">${dish.name}</h3>
+                    <div class="price">$${dish.price}</div>
+                    <button class="add-to-cart" data-dish-id="${dish.id}" data-name="${dish.name}" data-price="${dish.price}">Add to Cart</button>
+                    <button class="favorite-btn" data-dish-id="${dish.id}" data-is-favorited="true">❤️</button>
+                  </div>
+                `;
+                favoriteContainer.appendChild(dishCard);
+              });
+            } else {
+              noFavoritesMessage.style.display = 'block';
+            }
+          }
+
+          document.querySelectorAll('.favorite-btn').forEach(button => {
+            const dishId = button.getAttribute('data-dish-id');
+            const isFavorited = data.favorites.some(fav => fav.id == dishId);
+            button.setAttribute('data-is-favorited', isFavorited);
+            button.textContent = isFavorited ? '❤️' : '❤️';
+          });
+        } else {
+          displayMessage(data.message || 'Error loading favorite dishes.', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        displayMessage('Error loading favorite dishes.', 'error');
+      }
+    }
+
+    async function addToFavorites(dishId) {
+      try {
+        const response = await fetch('{% url "add_to_favorites" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ dish_id: dishId })
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          displayMessage('Added to favorites!', 'success');
+          fetchFavorites();
+        } else {
+          displayMessage(data.message || 'Failed to add to favorites.', 'error');
+          if (data.message === 'Login required') {
+            window.location.href = '{% url "login" %}';
+          }
+        }
+      } catch (error) {
+        console.error('Error adding to favorites:', error);
+        displayMessage('An error occurred while adding to favorites.', 'error');
+      }
+    }
+
+    async function removeFromFavorites(dishId) {
+      try {
+        const response = await fetch('{% url "remove_from_favorites" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ dish_id: dishId })
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          displayMessage('Removed from favorites!', 'success');
+          fetchFavorites();
+        } else {
+          displayMessage(data.message || 'Failed to remove from favorites.', 'error');
+        }
+      } catch (error) {
+        console.error('Error removing from favorites:', error);
+        displayMessage('An error occurred while removing from favorites.', 'error');
+      }
+    }
+
+    // Fetch Order Tracking and Connect WebSocket
+    let sockets = {};
+
+    async function fetchOrderTracking() {
+      try {
+        const response = await fetch('{% url "get_order_history" %}');
+        const data = await response.json();
+        const trackingList = document.getElementById('order-tracking-tbody');
+        trackingList.innerHTML = '';
+
+        if (data.status === 'success' && data.orders.length > 0) {
+          const activeOrders = data.orders.filter(order => 
+            ['pending', 'received', 'kitchen', 'delivery'].includes(order.status)
+          );
+
+          if (activeOrders.length > 0) {
+            activeOrders.forEach(order => {
+              const row = document.createElement('tr');
+              row.setAttribute('data-order-id', order.id);
+              row.innerHTML = `
+                <td>${order.id}</td>
+                <td>${new Date(order.created_at).toLocaleString()}</td>
+                <td>${order.items.map(item => `${item.dish_name} (x${item.quantity})`).join('<br>')}</td>
+                <td>$${order.total}</td>
+                <td id="status-${order.id}">${order.status}</td>
+              `;
+              trackingList.appendChild(row);
+
+              connectOrderWebSocket(order.id);
+            });
+          } else {
+            trackingList.innerHTML = '<tr><td colspan="5">No active orders to track.</td></tr>';
+          }
+        } else {
+          trackingList.innerHTML = '<tr><td colspan="5">No active orders to track.</td></tr>';
+        }
+      } catch (error) {
+        console.error('Error fetching order tracking:', error);
+        trackingList.innerHTML = '<tr><td colspan="5">Error loading orders.</td></tr>';
+      }
+    }
+
+    function connectOrderWebSocket(orderId) {
+      if (sockets[orderId]) {
+        sockets[orderId].close();
+      }
+
+      const socket = new WebSocket(`ws://${window.location.host}/ws/order/${orderId}/`);
+      sockets[orderId] = socket;
+
+      socket.onopen = function() {
+        console.log(`WebSocket connected for Order #${orderId}`);
+      };
+
+      socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const statusElement = document.getElementById(`status-${orderId}`);
+        if (statusElement) {
+          statusElement.textContent = data.status;
+          displayMessage(`Order #${orderId} updated to ${data.status}`, 'success');
+          if (['delivered', 'cancelled'].includes(data.status)) {
+            socket.close();
+            delete sockets[orderId];
+            fetchOrderTracking();
+          }
+        }
+      };
+
+      socket.onclose = function(event) {
+        console.log(`WebSocket closed for Order #${orderId}`, event);
+        delete sockets[orderId];
+      };
+
+      socket.onerror = function(error) {
+        console.error(`WebSocket error for Order #${orderId}:`, error);
+        displayMessage(`Error tracking Order #${orderId}`, 'error');
+      };
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .container-menu {
+      display: flex;
+      width: 100%;
+      min-height: 100vh; 
+      align-items: stretch;
+    }
+
+    .left-sidebar,
+    .main-content,
+    .right-sidebar {
+      padding: 20px;
+      box-sizing: border-box; 
+    }
+
+    .left-sidebar {
+      width: 20%;
+      background: #fff;
+      border-right: 1px solid #ddd;
+    }
+
+    .main-content {
+      width: 60%;
+      background: #fff;
+      border-right: 1px solid #ddd;
+
+    }
+
+    .right-sidebar {
+      width: 20%;
+      background: #fff;
+      position: sticky; /* Keep the sidebar fixed while scrolling */
+      top: 0; /* Align to the top */
+      height: 100vh; /* Match the viewport height */
+      overflow-y: auto; /* Allow scrolling if content overflows */
+    }
+
+    /* Left Sidebar */
+    .left-sidebar h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .left-sidebar a {
+      text-decoration: none;
+      color: #ff6200;
+    }
+
+    .left-sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .left-sidebar ul li {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    .left-sidebar ul li:hover,
+    .left-sidebar ul li.active {
+      background: #ff6200;
+    }
+
+    .left-sidebar ul li a {
+      text-decoration: none;
+      color: #ff6200;
+      font-size: 16px;
+    }
+
+    .left-sidebar ul li:hover a,
+    .left-sidebar ul li.active a {
+      color: #fff;
+    }
+
+    .left-sidebar button {
+      background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    /* Main Content */
+    header input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page[style*="block"] {
+      display: block;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Banner */
+    .banner {
+      background: #ff6200;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+
+    .banner h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Categories */
+    .categories {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    .categories div {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .categories div:hover,
+    .categories div.active {
+      background: #ff6200;
+      color: #fff;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Dishes Container */
+    .dishes-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px; 
+    }
+
+    /* Dish Card */
+    .dish-card {
+      width: 30%;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-sizing: border-box; /* Prevent overflow due to padding/border */
+    }
+
+    .dish-image img {
+      width: 100%;
+      height: 188px;
+      object-fit: cover;
+    }
+
+    .discount-badge {
+      background: #ff6200;
+      color: #fff;
+      padding: 5px;
+      position: static;
+      align-items: center;
+    }
+
+    .dish-details {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .dish-name {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .price {
+      font-size: 16px;
+      color: #ff6200;
+      margin-bottom: 10px;
+    }
+
+    .add-to-cart {
+      background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .favorite-btn {
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .view-all a {
+      color: #6a0dad;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .dish-card.hidden {
+      display: none;
+    }
+
+    /* Tables (Order, Reservation, Notification) */
+    .order-table,
+    .reservation-table,
+    .notification-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .order-table th,
+    .order-table td,
+    .reservation-table th,
+    .reservation-table td,
+    .notification-table th,
+    .notification-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .order-table th,
+    .reservation-table th,
+    .notification-table th {
+      background: #ff6200;
+      color: #fff;
+    }
+
+    .order-table tr:nth-child(even),
+    .reservation-table tr:nth-child(even),
+    .notification-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    /* Reservation Form */
+    .reservation-form {
+      margin-bottom: 20px;
+    }
+
+    .reservation-form label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    .reservation-form input,
+    .reservation-form textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .reservation-form button {
+      background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Cart Page */
+    .cart-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .cart-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+
+    .cart-table th,
+    .cart-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .cart-table th {
+      background: #ff6200;
+      color: white;
+      font-weight: 500;
+    }
+
+    .cart-table td {
+      color: #34495e;
+    }
+
+    .cart-table tr:hover {
+      background: #f9f9f9;
+    }
+
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      background: #c0392b;
+    }
+
+    .cart-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    #cart-total {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #ff6200;
+    }
+
+    .checkout-btn {
+        background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      width: 20%;
+      cursor: pointer;
+    }
+
+    .checkout-btn:hover {
+      background:rgb(185, 41, 41);
+    }
+
+    /* Profile Page */
+    .profile-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .profile-header {
+      margin-bottom: 2rem;
+    }
+
+    .profile-photo {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .profile-photo img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ff6200;
+    }
+
+    .upload-btn {
+      background: #ff6200;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .upload-btn:hover {
+      background: hsl(3, 90%, 55%);
+    }
+
+    .profile-details p {
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+      color: #34495e;
+    }
+
+    .profile-details strong {
+      color: #ff6200;
+    }
+
+    .edit-btn {
+      background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .edit-btn:hover {
+      background:rgb(185, 53, 41);
+    }
+
+    .edit-profile-form {
+      margin-top: 2rem;
+      text-align: left;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #bdc3c7;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .save-btn,
+    .cancel-btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .save-btn {
+      background: #ff6200;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background: hsl(3, 90%, 55%);
+    }
+
+    .cancel-btn {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .cancel-btn:hover {
+      background: #c0392b;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .error.active {
+      display: block;
+    }
+
+    /* Right Sidebar */
+    .cart-summary {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+    }
+
+    .cart-summary h3 {
+      font-size: 16px;
+      margin: 0 0 5px 0;
+      color: #34495e;
+    }
+
+    .cart-summary p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #ff6200;
+    }
+
+    .cart-summary #cart-summary-preview {
+      max-height: 100px;
+      overflow-y: auto;
+      margin-top: 5px;
+    }
+
+    .cart-summary #cart-summary-preview p {
+      margin: 2px 0;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .order-menu {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .total {
+      font-size: 18px;
+      color: #ff0000;
+      margin: 10px 0;
+    }
+
+    .checkout {
+      background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .sidebar-messages {
+      margin-top: 20px;
+      max-height: 150px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+
+    .sidebar-messages p {
+      margin: 5px 0;
+      padding: 5px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #34495e;
+    }
+
+    .sidebar-messages p.success {
+      background: #e0f7fa;
+      color: #006064;
+    }
+
+    .sidebar-messages p.error {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .clear-messages-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .clear-messages-btn:hover {
+      background: #c0392b;
+    }
+
+    /* Rewards Info */
+#rewards-info {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Points Display */
+#rewards-info p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+#rewards-info p strong {
+  color: #333;
+}
+
+#reward-points {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* Rewards List */
+#rewards-list {
+  list-style-type: none;
+  margin: 10px 0 20px 0;
+  padding-left: 0;
+}
+
+#rewards-list li {
+  padding: 10px;
+  background-color: #f1f1f1;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  font-size: 15px;
+  color: #444;
+  transition: background-color 0.3s;
+}
+
+#rewards-list li:hover {
+  background-color: #e9ecef;
+}
+
+/* Redeem Section */
+.redeem-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.redeem-section label {
+  font-size: 14px;
+  color: #000;
+  margin-right: 10px;
+}
+
+#reward-select {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  flex: 1;
+  min-width: 200px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+#reward-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+.rewardbttn{
+   background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      width: 20%;
+      cursor: pointer;
+}
+
+
+
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Message Styling (for displayMessage) */
+#message-container div {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+#message-container div.success {
+  background-color: #28a745;
+}
+
+#message-container div.error {
+  background-color: #dc3545;
+}
+
+/* Fade Animation for Messages */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+  .page {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .redeem-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #reward-select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+    /* Help/Support Page Styles */
+    .help-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .help-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .help-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .help-card h3 {
+      font-size: 1.5rem;
+      color: #ff6200;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #ff6200;
+      padding-bottom: 5px;
+    }
+
+    /* Contact Info */
+    .contact-info p {
+      font-size: 1.1rem;
+      color: #34495e;
+      margin: 10px 0;
+    }
+
+    .contact-info strong {
+      color: #ff6200;
+    }
+
+    .contact-info a {
+      color: #3498db;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .contact-info a:hover {
+      color: #ff6200;
+      text-decoration: underline;
+    }
+
+    /* FAQs */
+    .faq-list {
+      margin-top: 10px;
+    }
+
+    .faq-item {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .faq-item:hover {
+      background: #f1f1f1;
+    }
+
+    .faq-item h4 {
+      font-size: 1.1rem;
+      color: #ff6200;
+      margin: 0 0 5px 0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .faq-item h4::after {
+      content: '▼';
+      font-size: 0.8rem;
+      position: absolute;
+      right: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-item h4:hover::after {
+      transform: rotate(180deg);
+    }
+
+    .faq-item p {
+      font-size: 1rem;
+      color: #666;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Support Form */
+    #support-form .form-group {
+      margin-bottom: 20px;
+    }
+
+    #support-form label {
+      display: block;
+      font-size: 1rem;
+      color: #34495e;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    #support-form input,
+    #support-form textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #support-form input:focus,
+    #support-form textarea:focus {
+      outline: none;
+      border-color: #ff6200;
+      box-shadow: 0 0 0 2px rgba(255, 98, 0, 0.2);
+    }
+
+    #support-form textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    #support-form .submit-btn {
+      background: #ff6200;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    #support-form .submit-btn:hover {
+      background: hsl(3, 90%, 55%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container-menu {
+        flex-direction: column;
+      }
+
+      .left-sidebar,
+      .main-content,
+      .right-sidebar {
+        width: 100%;
+        height: auto; /* Remove fixed height on mobile */
+        position: static; /* Remove sticky positioning on mobile */
+      }
+
+      .main-content {
+        border-right: none;
+      }
+
+      .right-sidebar {
+        border-top: 1px solid #ddd;
+      }
+
+      .dish-card {
+        width: 100%; /* Full width on mobile */
+      }
+    }
+
+/* Analytics */
+    .analytics-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .analytics-card {
+      flex: 1;
+      min-width: 300px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .analytics-card h3 {
+      margin: 0 0 10px;
+      color: #ff6200;
+    }
+
+    .analytics-card p {
+      font-size: 1.5em;
+      color: #333;
+    }
+  </style>
+{% endblock %}

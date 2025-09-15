@@ -1,0 +1,299 @@
+{% extends 'base.html' %} 
+{% block content %}
+  <div class="reservation-container">
+    <h1>New Reservation</h1>
+    {% if messages %}
+      {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+    {% if user.is_authenticated %}
+      <form id="reservationForm" method="post" action="{% url 'submit_reservation' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="first_name" value="{{ user.first_name }}" required />
+          <div class="error" id="firstNameError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="last_name" value="{{ user.last_name }}" required />
+          <div class="error" id="lastNameError"></div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required />
+            <div class="error" id="phoneError"></div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" required />
+            <div class="error" id="emailError"></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label for="date">Reservation Date</label>
+            <input type="date" id="date" name="date" required />
+            <div class="error" id="dateError"></div>
+          </div>
+          <div class="form-group">
+            <label for="time">Reservation Time</label>
+            <input type="time" id="time" name="time" required />
+            <div class="error" id="timeError"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="people">Number of People</label>
+          <select id="people" name="people" required>
+            <option value="">Select number</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5+">5+</option>
+          </select>
+          <div class="error" id="peopleError"></div>
+        </div>
+
+        <button type="submit">Submit Reservation</button>
+      </form>
+    {% else %}
+      <p>
+        Please <a href="{% url 'login' %}">log in</a> to make a reservation.
+      </p>
+    {% endif %}
+  </div>
+
+  <style>
+    * {
+      padding: 0;
+      box-sizing: border-box;
+    }
+    header {
+      background-color: whitesmoke;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      min-height: 100vh;
+      background-image: url('/static/images/background-reserv.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .reservation-container {
+      top: 50%;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 690px;
+      margin: 80px;
+      margin-top: 16%;
+    }
+    h1 {
+      text-align: center;
+      color: #ff6200;
+      margin-bottom: 2rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+      font-weight: 500;
+    }
+    input,
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #bdc3c7;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    .row {
+      display: flex;
+      gap: 1rem;
+    }
+    .row > div {
+      flex: 1;
+    }
+    button {
+      background: #ff6200;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: hsl(3, 90%, 55%);
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    .error.active {
+      display: block;
+    }
+    p.error {
+      color: red;
+    }
+    p.success {
+      color: green;
+    }
+  </style>
+
+  <script>
+    const form = document.getElementById('reservationForm');
+    const errorElements = document.querySelectorAll('.error');
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let isValid = true;
+
+            // Reset errors
+            errorElements.forEach((error) => error.classList.remove('active'));
+
+            // Validate fields
+            console.log('Starting validation...');
+            isValid = validateField('firstName', 'First name is required') && isValid;
+            console.log('After firstName validation, isValid:', isValid);
+            isValid = validateField('lastName', 'Last name is required') && isValid;
+            console.log('After lastName validation, isValid:', isValid);
+            isValid = validateField('phone', 'Phone number is required', isPhoneValid) && isValid;
+            console.log('After phone validation, isValid:', isValid);
+            isValid = validateField('email', 'Valid email is required', isEmailValid) && isValid;
+            console.log('After email validation, isValid:', isValid);
+            isValid = validateField('date', 'Date is required') && isValid;
+            console.log('After date validation, isValid:', isValid);
+            isValid = validateField('time', 'Time is required') && isValid;
+            console.log('After time validation, isValid:', isValid);
+            isValid = validateField('people', 'Please select number of people') && isValid;
+            console.log('After people validation, isValid:', isValid);
+
+            if (isValid) {
+                const first_name = document.getElementById('firstName').value;
+                const last_name = document.getElementById('lastName').value;
+                const phone = document.getElementById('phone').value;
+                const email = document.getElementById('email').value;
+                const date = document.getElementById('date').value;
+                const time = document.getElementById('time').value;
+                const people = document.getElementById('people').value;
+
+                console.log('Submitting data:', { first_name, last_name, phone, email, date, time, people });
+
+                const response = await fetch('{% url "submit_reservation" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ first_name, last_name, phone, email, date, time, people })
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert(data.message);
+                    form.reset();
+                    window.location.href = '{% url "home" %}';
+                } else {
+                    if (data.errors) {
+                        const fieldToErrorIdMap = {
+                            'first_name': 'firstNameError',
+                            'last_name': 'lastNameError',
+                            'phone': 'phoneError',
+                            'email': 'emailError',
+                            'date': 'dateError',
+                            'time': 'timeError',
+                            'people': 'peopleError'
+                        };
+
+                        for (const [field, message] of Object.entries(data.errors)) {
+                            const errorElementId = fieldToErrorIdMap[field];
+                            const errorElement = document.getElementById(errorElementId);
+                            if (errorElement) {
+                                showError(errorElement, message);
+                            } else {
+                                console.log(`Error element not found for field: ${field}`);
+                            }
+                        }
+                    } else {
+                        alert('An error occurred: ' + (data.message || 'Please try again.'));
+                    }
+                }
+            } else {
+                console.log('Form submission blocked due to validation errors');
+            }
+        });
+    }
+
+    function validateField(id, errorMessage, validationFn) {
+        const field = document.getElementById(id);
+        const errorElement = document.getElementById(`${id}Error`);
+        const value = field.value.trim();
+        console.log(`Validating ${id}: ${value}`);
+        if (value === '') {
+            console.log(`${id} is empty`);
+            showError(errorElement, errorMessage);
+            return false;
+        }
+        if (validationFn && !validationFn(value)) {
+            console.log(`${id} failed validation`);
+            showError(errorElement, errorMessage);
+            return false;
+        }
+        return true;
+    }
+
+    function showError(element, message) {
+        element.textContent = message;
+        element.classList.add('active');
+    }
+
+    function isEmailValid(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function isPhoneValid(phone) {
+        return /^\d{10,}$/.test(phone);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === name + '=') {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

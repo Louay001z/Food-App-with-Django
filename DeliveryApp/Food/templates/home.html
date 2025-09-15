@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <body id="top">
+    <main>
+      <article>
+        <!-- #HERO -->
+        <section class="hero" id="home" style="background-image: url('{% static 'images/hero-bg.jpg' %}')">
+          <div class="container">
+            <div class="hero-content">
+              <p class="hero-subtitle">Eat Sleep And</p>
+              <h2 class="h1 hero-title">Supper delicious Burger in town!</h2>
+              <p class="hero-text">Food is any substance consumed to provide nutritional support for an organism.</p>
+              <button class="btn"><a href="{% url 'reservation' %}">Book A Table</a></button>
+            </div>
+            <div class="hero-banner">
+              <img src="{% static 'images/hero-banner-bg.png' %}" width="820" height="716" class="w-100 hero-img-bg" alt="Hero background" />
+              <img src="{% static 'images/hero-banner.png' %}" width="700" height="637" class="w-100 hero-img" alt="Burger" />
+            </div>
+          </div>
+        </section>
+
+        <!-- PROMO -->
+        <section class="section section-divider white promo">
+          <div class="container">
+            <ul class="promo-list has-scrollbar">
+              {% for item in promo_items %}
+                <li class="promo-item">
+                  <div class="promo-card">
+                    <div class="card-icon">{{ item.icon|safe }}</div>
+                    <h3 class="h3 card-title">{{ item.title }}</h3>
+                    <p class="card-text">{{ item.text }}</p>
+                    <img src="{% static item.image %}" width="300" height="300" loading="lazy" alt="{{ item.title }}" class="w-100 card-banner" />
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </section>
+
+        <!-- ABOUT -->
+        <section class="section section-divider gray about" id="about">
+          <div class="container">
+            <div class="about-banner">
+              <img src="{% static 'images/about-banner.png' %}" width="509" height="459" loading="lazy" alt="Burger with Drinks" class="w-100 about-img" />
+              <img src="{% static 'images/sale-shape-red.png' %}" width="216" height="226" alt="Get up to 50% off now" class="abs-img scale-up-anim" />
+            </div>
+            <div class="about-content">
+              <h2 class="h2 section-title">Caferio, Burgers, and Best Pizzas <span class="span">in Town!</span></h2>
+              <p class="section-text">The restaurants in Hangzhou also catered to many northern Chinese who had fled south from Kaifeng during the Jurchen invasion of the 1120s, while it is also known that many restaurants were run by families.</p>
+              <ul class="about-list">
+                <li class="about-item">
+                  <ion-icon name="checkmark-outline"></ion-icon><span class="span">Delicious & Healthy Foods</span>
+                </li>
+                <li class="about-item">
+                  <ion-icon name="checkmark-outline"></ion-icon><span class="span">Spacific Family And Kids Zone</span>
+                </li>
+                <li class="about-item">
+                  <ion-icon name="checkmark-outline"></ion-icon><span class="span">Music & Other Facilities</span>
+                </li>
+                <li class="about-item">
+                  <ion-icon name="checkmark-outline"></ion-icon><span class="span">Fastest Food Home Delivery</span>
+                </li>
+              </ul>
+              <button class="btn btn-hover"><a href="{% url 'menu' %}">Order Now</a></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- FOOD MENU -->
+       
+            <section class="section food-menu" id="food-menu">
+                <div class="container">
+
+                    <p class="section-subtitle">Popular Dishes</p>
+
+                    <h2 class="h2 section-title">
+                        Our Delicious <span class="span">Foods</span>
+                    </h2>
+
+                    <p class="section-text">
+                        Food is any substance consumed to provide nutritional support for an organism.
+                    </p>
+
+                    <ul class="fiter-list">
+
+                        <li>
+                            <button class="filter-btn  active">All</button>
+                        </li>
+
+                        <li>
+                            <button class="filter-btn">Pizza</button>
+                        </li>
+
+                        <li>
+                            <button class="filter-btn">Burger</button>
+                        </li>
+
+                        <li>
+                            <button class="filter-btn">Drinks</button>
+                        </li>
+
+                        <li>
+                            <button class="filter-btn">Sandwich</button>
+                        </li>
+
+                    </ul>
+                    <ul class="food-menu-list">
+                        <li>
+                            <div class="food-menu-card">
+
+                                <div class="card-banner">
+                                    <img src="{% static 'images/food-menu-1.png' %}" width="300" height="300" loading="lazy"
+                                        alt="Fried Chicken Unlimited" class="w-100">
+
+                                    <div class="badge">-15%</div>
+
+                                    <button class="btn food-menu-btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                                </div>
+
+                                <div class="wrapper">
+                                    <p class="category">Chicken</p>
+
+                                    <div class="rating-wrapper">
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                    </div>
+                                </div>
+
+                                <h3 class="h3 card-title">Fried Chicken Unlimited</h3>
+
+                                <div class="price-wrapper">
+
+                                    <p class="price-text">Price:</p>
+
+                                    <data class="price">$49.00</data>
+
+                                    <del class="del" value="69.00">$69.00</del>
+
+                                </div>
+
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="food-menu-card">
+
+                                <div class="card-banner">
+                                    <img src="{% static 'images/food-menu-2.png' %}" width="300" height="300" loading="lazy"
+                                        alt="Burger King Whopper" class="w-100">
+
+                                    <div class="badge">-10%</div>
+
+                                    <button class="btn food-menu-btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                                </div>
+
+                                <div class="wrapper">
+                                    <p class="category">Noddles</p>
+
+                                    <div class="rating-wrapper">
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                    </div>
+                                </div>
+
+                                <h3 class="h3 card-title">Burger King Whopper</h3>
+
+                                <div class="price-wrapper">
+
+                                    <p class="price-text">Price:</p>
+
+                                    <data class="price" value="29.00">$29.00</data>
+
+                                    <del class="del">$39.00</del>
+
+                                </div>
+
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="food-menu-card">
+
+                                <div class="card-banner">
+                                    <img src="{% static 'images/food-menu-3.png' %}" width="300" height="300" loading="lazy"
+                                        alt="White Castle Pizzas" class="w-100">
+
+                                    <div class="badge">-25%</div>
+
+                                    <button class="btn food-menu-btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                                </div>
+
+                                <div class="wrapper">
+                                    <p class="category">Pizzas</p>
+
+                                    <div class="rating-wrapper">
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                    </div>
+                                </div>
+
+                                <h3 class="h3 card-title">White Castle Pizzas</h3>
+
+                                <div class="price-wrapper">
+
+                                    <p class="price-text">Price:</p>
+
+                                    <data class="price" value="49.00">$49.00</data>
+
+                                    <del class="del">$69.00</del>
+
+                                </div>
+
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="food-menu-card">
+
+                                <div class="card-banner">
+                                    <img src="{% static 'images/food-menu-4.png' %}" width="300" height="300" loading="lazy"
+                                        alt="Bell Burrito Supreme" class="w-100">
+
+                                    <div class="badge">-20%</div>
+
+                                    <button class="btn food-menu-btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                                </div>
+
+                                <div class="wrapper">
+                                    <p class="category">Burrito</p>
+
+                                    <div class="rating-wrapper">
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                    </div>
+                                </div>
+
+                                <h3 class="h3 card-title">Bell Burrito Supreme</h3>
+
+                                <div class="price-wrapper">
+
+                                    <p class="price-text">Price:</p>
+
+                                    <data class="price" value="59.00 ">$59.00</data>
+
+                                    <del class="del">$69.00</del>
+
+                                </div>
+
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="food-menu-card">
+
+                                <div class="card-banner">
+                                    <img src="{% static 'images/food-menu-5.png' %}" width="300" height="300" loading="lazy"
+                                        alt="Kung Pao Chicken BBQ" class="w-100">
+
+                                    <div class="badge">-5%</div>
+
+                                    <button class="btn food-menu-btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                                </div>
+
+                                <div class="wrapper">
+                                    <p class="category">Nuggets</p>
+
+                                    <div class="rating-wrapper">
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                    </div>
+                                </div>
+
+                                <h3 class="h3 card-title">Kung Pao Chicken BBQ</h3>
+
+                                <div class="price-wrapper">
+
+                                    <p class="price-text">Price:</p>
+
+                                    <data class="price" value="49.00">$49.00</data>
+
+                                    <del class="del">$69.00</del>
+
+                                </div>
+
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="food-menu-card">
+
+                                <div class="card-banner">
+                                    <img src="{% static 'images/food-menu-6.png' %}" width="300" height="300" loading="lazy"
+                                        alt="Wendy's Chicken" class="w-100">
+
+                                    <div class="badge">-15%</div>
+
+                                    <button class="btn food-menu-btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                                </div>
+
+                                <div class="wrapper">
+                                    <p class="category">Chicken</p>
+
+                                    <div class="rating-wrapper">
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                        <ion-icon name="star"></ion-icon>
+                                    </div>
+                                </div>
+
+                                <h3 class="h3 card-title">Wendy's Chicken</h3>
+
+                                <div class="price-wrapper">
+
+                                    <p class="price-text">Price:</p>
+
+                                    <data class="price" value="49.00">$49.00</data>
+
+                                    <del class="del">$69.00</del>
+
+                                </div>
+
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+            </section>
+
+        <!-- CTA -->
+        <section class="section section-divider white cta" style="background-image: url('{% static 'images/hero-bg.jpg' %}')">
+          <div class="container">
+            <div class="cta-content">
+              <h2 class="h2 section-title">The Foodie Have Excellent Of <span class="span">Quality Burgers!</span></h2>
+              <p class="section-text">The restaurants in Hangzhou also catered to many northern Chinese who had fled south from Kaifeng during the Jurchen invasion of the 1120s, while it is also known that many restaurants were run by families.</p>
+              <button class="btn btn-hover"><a href="{% url 'menu' %}">Order Now</a></button>
+            </div>
+            <figure class="cta-banner">
+              <img src="{% static 'images/cta-banner.png' %}" width="700" height="637" loading="lazy" alt="Burger" class="w-100 cta-img" />
+              <img src="{% static 'images/sale-shape.png' %}" width="216" height="226" loading="lazy" alt="Get up to 50% off now" class="abs-img scale-up-anim" />
+            </figure>
+          </div>
+        </section>
+
+        <!-- DELIVERY -->
+        <section class="section section-divider gray delivery">
+          <div class="container">
+            <div class="delivery-content">
+              <h2 class="h2 section-title">A Moments Of Delivered On <span class="span">Right Time</span> & Place</h2>
+              <p class="section-text">The restaurants in Hangzhou also catered to many northern Chinese who had fled south from Kaifeng during the Jurchen invasion of the 1120s, while it is also known that many restaurants were run by families.</p>
+              <button class="btn btn-hover"><a href="{% url 'menu' %}">Order Now</a></button>
+            </div>
+            <figure class="delivery-banner">
+              <img src="{% static 'images/delivery-banner-bg.png' %}" width="700" height="602" loading="lazy" alt="Clouds" class="w-100" />
+              <img src="{% static 'images/delivery-boy.svg' %}" width="1000" height="880" loading="lazy" alt="Delivery boy" class="w-100 delivery-img" data-delivery-boy />
+            </figure>
+          </div>
+        </section>
+
+        <!-- BANNER -->
+        <section class="section section-divider gray banner">
+          <div class="container">
+            <ul class="banner-list">
+              <li class="banner-item banner-lg">
+                <div class="banner-card">
+                  <img src="{% static 'images/banner-1.jpg' %}" width="550" height="450" loading="lazy" alt="Discount For Delicious Tasty Burgers!" class="banner-img" />
+                  <div class="banner-item-content">
+                    <p class="banner-subtitle">50% Off Now!</p>
+                    <h3 class="banner-title">Discount For Delicious Tasty Burgers!</h3>
+                    <p class="banner-text">Sale off 50% only this week</p>
+                    <button class="btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                  </div>
+                </div>
+              </li>
+              <li class="banner-item banner-sm">
+                <div class="banner-card">
+                  <img src="{% static 'images/banner-2.jpg' %}" width="550" height="465" loading="lazy" alt="Delicious Pizza" class="banner-img" />
+                  <div class="banner-item-content">
+                    <h3 class="banner-title">Delicious Pizza</h3>
+                    <p class="banner-text">50% off Now</p>
+                    <button class="btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                  </div>
+                </div>
+              </li>
+              <li class="banner-item banner-sm">
+                <div class="banner-card">
+                  <img src="{% static 'images/banner-3.jpg' %}" width="550" height="465" loading="lazy" alt="American Burgers" class="banner-img" />
+                  <div class="banner-item-content">
+                    <h3 class="banner-title">American Burgers</h3>
+                    <p class="banner-text">50% off Now</p>
+                    <button class="btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                  </div>
+                </div>
+              </li>
+              <li class="banner-item banner-md">
+                <div class="banner-card">
+                  <img src="{% static 'images/banner-4.jpg' %}" width="550" height="220" loading="lazy" alt="Tasty Buzzed Pizza" class="banner-img" />
+                  <div class="banner-item-content">
+                    <h3 class="banner-title">Tasty Buzzed Pizza</h3>
+                    <p class="banner-text">Sale off 50% only this week</p>
+                    <button class="btn"><a href="{% url 'menu' %}">Order Now</a></button>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" style="background-image: url('{% static 'images/footer-illustration.png' %}')">
+      <div class="footer-top">
+        <div class="container">
+          <div class="footer-brand">
+            <a href="/" class="logo">B<span class="span">'</span>aamira<span class="span">.</span></a>
+            <p class="footer-text">Financial experts support or help you to find out which way you can raise your funds more.</p>
+            <ul class="social-list">
+              <li>
+                <a href="#" class="social-link"><ion-icon name="logo-facebook"></ion-icon></a>
+              </li>
+              <li>
+                <a href="#" class="social-link"><ion-icon name="logo-twitter"></ion-icon></a>
+              </li>
+              <li>
+                <a href="#" class="social-link"><ion-icon name="logo-instagram"></ion-icon></a>
+              </li>
+              <li>
+                <a href="#" class="social-link"><ion-icon name="logo-pinterest"></ion-icon></a>
+              </li>
+            </ul>
+          </div>
+          <ul class="footer-list">
+            <li>
+              <p class="footer-list-title">Contact Info</p>
+            </li>
+            <li>
+              <p class="footer-list-item">+216 24 127 103</p>
+            </li>
+            <li>
+              <p class="footer-list-item">louaybenamira2o@gmail.com</p>
+            </li>
+            <li>
+              <address class="footer-list-item">Tunisia, Douz, 09514</address>
+            </li>
+          </ul>
+          <ul class="footer-list">
+            <li>
+              <p class="footer-list-title">Opening Hours</p>
+            </li>
+            <li>
+              <p class="footer-list-item">Monday-Friday: 08:00-22:00</p>
+            </li>
+            <li>
+              <p class="footer-list-item">Tuesday 4PM: Till Mid Night</p>
+            </li>
+            <li>
+              <p class="footer-list-item">Saturday: 10:00-16:00</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p class="copyright-text">
+            © 2024 <a href="#" class="copyright-link">LOUAY BEN AMIRA</a> All Rights Reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </body>
+{% endblock %}

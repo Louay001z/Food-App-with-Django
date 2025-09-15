@@ -1,0 +1,51 @@
+<header class="header" data-header>
+  <div class="container">
+    <h1><a href="{% url 'home' %}" class="logo">B <span class="span">'</span> aamira <span class="span">.</span></a></h1>
+
+    <nav class="navbar" data-navbar>
+      <ul class="navbar-list">
+        <li class="nav-item">
+          <a href="{% url 'home' %}" class="navbar-link" data-nav-link>Home</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{% url 'menu' %}" class="navbar-link" data-nav-link>Menu</a>
+        </li>
+        <li class="nav-item">
+          <a href="#blog" class="navbar-link" data-nav-link>About</a>
+        </li>
+
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a href="{% url 'logout' %}" class="navbar-link" data-nav-link>Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a href="{% url 'login' %}" class="navbar-link" data-nav-link>Login</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'signup' %}" class="navbar-link" data-nav-link>Signup</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <div class="header-btn-group">
+      <a href="{% url 'reservation' %}"><button class="btn btn-hover">Reservation</button></a>
+      <button class="nav-toggle-btn" aria-label="Toggle Menu" data-menu-toggle-btn>
+        <span class="line top"></span>
+        <span class="line middle"></span>
+        <span class="line bottom"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .container {
+    color: black;
+  }
+  button {
+    color: #ff6200;
+  }
+</style>
